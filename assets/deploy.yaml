@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: deploy-public-api-beta
+  namespace: public
+
+spec:
+  replicas: 3
+
+  selector:
+    matchLabels:
+      app: public-api
+      version: "2.0.0"
+  template:
+    metadata:
+      name: public-api
+      labels:
+        app: public-api
+        version: "2.0.0"
+      annotations:
+        prometheus.io/scrape: "true"
+    spec:
+      containers:
+      - name: public-api
+        imagePullPolicy: Always
+        image: cachac/kubelabs_publicapi:2.0.0
+        ports:
+        - containerPort: 3000
+          name: public-api
+        - containerPort: 3080
+          name: healthcheck
+        resources:
+          limits:
+            cpu: 200m
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: 3080
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+        envFrom:
+          - configMapRef:
+              name: cm-private-api
+

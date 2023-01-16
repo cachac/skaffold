@@ -42,3 +42,14 @@ EXPOSE 3000
 CMD ["node", "./dist/main.js"]
 ```
 
+# Kubernetes yaml
+- deployment
+- configMap
+- service
+
+# Init
+```vim
+skaffold init
+```
+> [x]  Docker (public-api/dockerfile)
+
