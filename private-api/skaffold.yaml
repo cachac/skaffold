@@ -1,0 +1,16 @@
+apiVersion: skaffold/v4beta1
+kind: Config
+metadata:
+  name: private-api
+build:
+  artifacts:
+  - image: cachac/kubelabs_privateapi_skaffold
+    docker:
+      dockerfile: Dockerfile
+      buildArgs:
+        APP_ENV: "{{.APP_ENV_KUBE_PRIVATE_API}}"
+manifests:
+  rawYaml:
+  - ns.yaml
+  - deploy.yaml
+  - svc.yaml

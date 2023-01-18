@@ -6,8 +6,7 @@ WORKDIR /app
 FROM base as builder
 COPY package*.json ./
 
-RUN npm ci
-#--only=production
+RUN npm install
 COPY ./src ./src
 
 RUN npm run build
@@ -22,21 +21,9 @@ COPY --from=builder /app/package.json ./
 ARG APP_ENV
 ENV APP_ENV=${APP_ENV}
 
-ARG PRIVATE_API
-ENV PRIVATE_API=${PRIVATE_API}
+EXPOSE 3002 3082
 
-EXPOSE 3000
+RUN adduser -D appuser
+USER appuser
 
 CMD ["node", "./dist/main.js"]
-
-
-# source .env.qa
-# echo $APP_ENV_KUBE_API
-
-#
-# docker hub
-#
-
-# docker build . -t cachac/kubelabs_publicapi:2.0.0 --build-arg APP_ENV="$APP_ENV_KUBE_API"
-# docker run --rm --name api -p 3000:3000 -p 3080:3080 cachac/kubelabs_publicapi:2.0.0
-# docker push cachac/kubelabs_publicapi:2.0.0
