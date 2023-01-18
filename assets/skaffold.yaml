@@ -3,23 +3,14 @@ kind: Config
 metadata:
   name: private-api
 build:
-  # local:
-  #   concurrency: 0
-
-  tagPolicy:
-    gitCommit:
-      prefix: "api-"
-      variant: AbbrevCommitSha
-
   artifacts:
   - image: cachac/kubelabs_privateapi_skaffold
     docker:
       dockerfile: Dockerfile
       buildArgs:
         APP_ENV: "{{.APP_ENV_KUBE_PRIVATE_API}}"
-
 manifests:
   rawYaml:
-  - kube/ns.yaml
-  - kube/deploy.yaml
-  - kube/svc.yaml
+  - ns.yaml
+  - deploy.yaml
+  - svc.yaml

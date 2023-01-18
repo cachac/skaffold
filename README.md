@@ -4,6 +4,7 @@
 curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
 sudo install skaffold /usr/local/bin/
 
+
 # 2. Clone repo
 ```vim
 git clone https://github.com/cachac/skaffold.git
@@ -126,8 +127,82 @@ curl http://localhost:3002/healthcheck
 # 10. change & auto re-build Image
 > package.json: "version": "3.0.0",
 
+# 11. Analyze
+```vim
+  skaffold init --analyze | jq
+```
+
+# 12. Multiple build projects
+# 13. Concurrency & Cache
+```yaml
+build:
+  local:
+    concurrency: 0
+```
+```vim
+ cat ~/.skaffold/cache
+```
+## 13.1. delete
+```vim
+skaffold delete
+```
+## 13.2. cached
+```vim
+skaffold dev --no-prune=false --cache-artifacts=false
 
 
+```
+> and then exit:
+Cleaning up...
+ - namespace "private" deleted
+ - deployment.apps "deploy-private-api" deleted
+ - service "svc-private-api" deleted
+Pruning images...
+
+# 14. port-forward
+```vim
+skaffold dev --port-forward
+```
+# 15. Run & Logs
+```vim
+skaffold run
+skaffold run --tail
+
+k get pods -n private
+```
+
+# 16. Tagging
+```yaml
+build:
+  tagPolicy:
+    envTemplate:
+      template: "{{.APP_VERSION}}"
+```
+```
+export APP_VERSION=4.0.0
+
+skaffold dev
+```
+ - cachac/kubelabs_privateapi_skaffold: Found. Tagging
+
+## 16.1. Check registry
+
+## 16.2. --tag
+```
+skaffold dev --tag=4.0.1
+```
+
+## Git tag
+```yaml
+  tagPolicy:
+    gitCommit:
+      prefix: "api-"
+      variant: AbbrevCommitSha
+```
+
+
+# 17. Profiles
+# 18. kustomize
 
 
 
