@@ -105,13 +105,13 @@ kubectl logs deployment/deploy-private-api-beta
 
 # 8. Environment Variables
 ```vi
-export APP_ENV_KUBE_PRIVATE_API="{ \"APP_NAME\":\"private-API\", \"NODE_ENV\":\"qa\", \"NODE_PORT\":\"3002\", \"TOKEN_LIMIT\":\"7d\", \"TOKEN_SECRET\":\"PASS\" }"
+export APP_ENV_DEV="{ \"APP_NAME\":\"private-API\", \"NODE_ENV\":\"dev\", \"NODE_PORT\":\"3002\", \"TOKEN_LIMIT\":\"7d\", \"TOKEN_SECRET\":\"PASS\" }"
 
-echo $APP_ENV_KUBE_PRIVATE_API
+echo $APP_ENV_DEV
 ```
 ```yaml
         buildArgs:
-          APP_ENV: "{{.APP_ENV_KUBE_PRIVATE_API}}"
+          APP_ENV: "{{.APP_ENV_DEV}}"
 ```
 ```vim
 skaffold dev
@@ -132,8 +132,7 @@ curl http://localhost:3002/healthcheck
   skaffold init --analyze | jq
 ```
 
-# 12. Multiple build projects
-# 13. Concurrency & Cache
+# 12. Concurrency & Cache
 ```yaml
 build:
   local:
@@ -142,11 +141,11 @@ build:
 ```vim
  cat ~/.skaffold/cache
 ```
-## 13.1. delete
+## 12.1. delete
 ```vim
 skaffold delete
 ```
-## 13.2. cached
+## 12.2. cached
 ```vim
 skaffold dev --no-prune=false --cache-artifacts=false
 
@@ -159,11 +158,11 @@ Cleaning up...
  - service "svc-private-api" deleted
 Pruning images...
 
-# 14. port-forward
+# 13. port-forward
 ```vim
 skaffold dev --port-forward
 ```
-# 15. Run & Logs
+# 14. Run & Logs
 ```vim
 skaffold run
 skaffold run --tail
@@ -171,7 +170,7 @@ skaffold run --tail
 k get pods -n private
 ```
 
-# 16. Tagging
+# 15. Tagging
 ```yaml
 build:
   tagPolicy:
@@ -185,56 +184,100 @@ skaffold dev
 ```
  - cachac/kubelabs_privateapi_skaffold: Found. Tagging
 
-## 16.1. Check registry
+## 15.1. Check registry
 
-## 16.2. --tag
+## 15.2. --tag
 ```
 skaffold dev --tag=4.0.1
 ```
 
-## Git tag
+## 15.3. Git tag
 ```yaml
   tagPolicy:
     gitCommit:
       prefix: "api-"
       variant: AbbrevCommitSha
 ```
+Generating tags...
+ - cachac/kubelabs_privateapi_skaffold -> cachac/kubelabs_privateapi_skaffold:api-51b89d6
 
-
-# 17. Profiles
-# 18. kustomize
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-templates:
-https://stackoverflow.com/questions/50359633/use-of-skaffold-using-minikube-without-registry
-
-build:
+## 15.4. Custom tags
+```yaml
   tagPolicy:
-    envTemplate:
-      template: "{{.IMAGE_NAME}}:{{.APP_VERSION}}"
+    customTemplate:
+      template: "{{.PREF}}_{{.SUFF}}"
+      components:
+        - name: PREF
+          dateTime:
+            format: "2006-01-02"
+            timezone: "Local"APP_ENV_DEV
+```
 
-
-https://skaffold.dev/docs/tutorials/ci_cd/
-
+# 16. Profile
+## 16.1. dev
+```yaml
+profiles:
+  - name: dev
+    # automatically activate this profile when current context is "ssh-microk8s"
+    activation:
+      - kubeContext: ssh-microk8s
     build:
       artifacts:
-        # Skaffold will use this as your image name and push it here after building
-        - image: asia.gcr.io/my-project/my-image
-          # We are using Docker as our builder here
+        - image: cachac/kubelabs_privateapi_skaffold
           docker:
-            # Pass the args we want to Docker during build
+            dockerfile: Dockerfile
             buildArgs:
-              NPM_REGISTRY: '{{.NPM_REGISTRY}}'
-              NPM_TOKEN: '{{.NPM_TOKEN}}'
+              APP_ENV: "{{.APP_ENV_DEV}}"
+```
+
+## 16.2. stage
+```yaml
+  - name: stage
+    activation:
+      - kubeContext: ssh-microk8s-stage
+    build:
+      artifacts:
+        - image: cachac/kubelabs_privateapi_skaffold
+          docker:
+            dockerfile: Dockerfile
+            buildArgs:
+              APP_ENV: "{{.APP_ENV_STAGE}}"
+```
+
+```
+export APP_ENV_STAGE="{ \"APP_NAME\":\"private-API\", \"NODE_ENV\":\"stage\", \"NODE_PORT\":\"3002\", \"TOKEN_LIMIT\":\"7d\", \"TOKEN_SECRET\":\"PASS\" }"
+
+echo $APP_ENV_STAGE
+```
+## 16.3. Optional: env variable
+```yaml
+activation:
+	- env: MY_ENV=stage
+
+```
+## 16.4. test
+```
+skaffold dev
+```
+> --profile dev
+> --profile stage
+
+## 16.5. Profile patching
+
+```yaml
+    patches:
+      - op: replace
+        path: /build/artifacts/0/docker/buildArgs/APP_ENV
+        value: "{{.APP_ENV_DEV}}"
+```
+
+# 17. kustomize
+
+
+
+
+
+
+
+
+

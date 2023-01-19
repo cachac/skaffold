@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-private-api
+
+spec:
+  type: ClusterIP
+  selector:
+    app: private-api
+
+  ports:
+  - name: http-3002
+    appProtocol: http
+    port: 3002
+    targetPort: 3002
+  - name: http-3082
+    appProtocol: http
+    port: 3082
+    targetPort: 3082

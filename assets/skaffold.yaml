@@ -3,14 +3,55 @@ kind: Config
 metadata:
   name: private-api
 build:
+  # local:
+  #   concurrency: 0
+
+  tagPolicy:
+    customTemplate:
+      template: "{{.PREF}}_{{.SUFF}}"
+      components:
+        - name: PREF
+          dateTime:
+            format: "2006-01-02"
+            timezone: "Local"
+
+        - name: SUFF
+          gitCommit:
+            variant: AbbrevCommitSha
+
   artifacts:
-  - image: cachac/kubelabs_privateapi_skaffold
-    docker:
-      dockerfile: Dockerfile
-      buildArgs:
-        APP_ENV: "{{.APP_ENV_KUBE_PRIVATE_API}}"
+    - image: cachac/kubelabs_privateapi_skaffold
+      docker:
+        dockerfile: Dockerfile
+        buildArgs:
+          APP_ENV: "{{.APP_ENV_DEV}}"
+
 manifests:
   rawYaml:
-  - ns.yaml
-  - deploy.yaml
-  - svc.yaml
+    - kube/ns.yaml
+    - kube/deploy.yaml
+    - kube/svc.yaml
+
+profiles:
+  - name: dev
+    # automatically activate this profile when current context is "ssh-microk8s"
+    activation:
+      - kubeContext: ssh-microk8s
+    build:
+      artifacts:
+        - image: cachac/kubelabs_privateapi_skaffold
+          docker:
+            dockerfile: Dockerfile
+            buildArgs:
+              APP_ENV: "{{.APP_ENV_DEV}}"
+
+  - name: stage
+    activation:
+      - kubeContext: ssh-microk8s-stage
+    build:
+      artifacts:
+        - image: cachac/kubelabs_privateapi_skaffold
+          docker:
+            dockerfile: Dockerfile
+            buildArgs:
+              APP_ENV: "{{.APP_ENV_STAGE}}"
