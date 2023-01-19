@@ -272,12 +272,14 @@ skaffold dev
 ```
 
 # 17. kustomize
-## 17.1. Create Kustomize structure: ./kustomize/private-api
+## 17.1. Install
+> [Info](https://kubectl.docs.kubernetes.io/installation/kustomize/)
+## 17.2. Create Kustomize structure: ./kustomize/private-api
 - base
 - overlays/dev
 - overlays/stage
 
-## 17.2. build
+## 17.3. build
 ```
 cd kustomize/private-api
 kustomize build overlays/stage
@@ -286,16 +288,16 @@ kustomize build overlays/stage
 kustomize build overlays/stage > build.yaml
 ```
 
-## 17.3. Merge: replicas in dev = 2
+## 17.4. Merge: replicas in dev = 2
 > strategic merge
 ```yaml
 patchesStrategicMerge:
   - deploy-strategic-patch.yaml
 ```
-## 17.4. Merge: replicas in stage = 3
+## 17.5. Merge: replicas in stage = 3
 > strategic merge
 
-## 17.5. In-line Patches: stage service on port 4000
+## 17.6. In-line Patches: stage service on port 4000
 > [Info](https://fabianlee.org/2022/04/15/kubernetes-kustomize-transformations-with-patchesjson6902/)
 ```yaml
 patches:
@@ -312,3 +314,31 @@ patches:
 
 # 18. Skaffold deploy + Kustomize
 
+## 18.1. Set Dev profile:
+```yaml
+profiles:
+  - name: dev
+    activation:
+      - kubeContext: ssh-microk8s
+    patches:
+      - op: replace
+        path: /build/artifacts/0/docker/buildArgs/APP_ENV
+        value: "{{.APP_ENV_DEV}}"
+    manifests:
+      kustomize:
+        paths:
+          - overlays/dev
+```
+```
+kubectl config set-context --current --namespace=default
+skaffold dev --profile dev
+kubectl get ns
+kubectl get pods -n private-dev
+```
+
+## 18.2. Set stage profile:
+```
+kubectl describe svc -n private-stage
+kubectl get pods -n private-stage
+```
+> Port:              http-privateapi  4000/TCP

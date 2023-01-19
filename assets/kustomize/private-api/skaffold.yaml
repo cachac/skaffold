@@ -1,0 +1,36 @@
+apiVersion: skaffold/v4beta1
+kind: Config
+metadata:
+  name: private-api
+build:
+  artifacts:
+    - image: cachac/kubelabs_privateapi_skaffold
+      docker:
+        dockerfile: Dockerfile
+        buildArgs:
+          APP_ENV: patch
+
+profiles:
+  - name: dev
+    activation:
+      - kubeContext: ssh-microk8s
+    patches:
+      - op: replace
+        path: /build/artifacts/0/docker/buildArgs/APP_ENV
+        value: "{{.APP_ENV_DEV}}"
+    manifests:
+      kustomize:
+        paths:
+          - overlays/dev
+
+  - name: stage
+    activation:
+      - kubeContext: ssh-microk8s-stage
+    patches:
+      - op: replace
+        path: /build/artifacts/0/docker/buildArgs/APP_ENV
+        value: "{{.APP_ENV_STAGE}}"
+    manifests:
+      kustomize:
+        paths:
+          - overlays/stage
