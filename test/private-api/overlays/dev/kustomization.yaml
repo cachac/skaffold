@@ -1,13 +1,15 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: private
+namespace: private-dev
 
 commonLabels:
   app: private-api
-  team: devops
-  version: 2.0.1
+  env: dev
 
 resources:
   - ns.yaml
   - ../../base
+
+patchesStrategicMerge:
+  - deploy-strategic-patch.yaml

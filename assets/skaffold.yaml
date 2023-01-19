@@ -24,7 +24,7 @@ build:
       docker:
         dockerfile: Dockerfile
         buildArgs:
-          APP_ENV: "{{.APP_ENV_DEV}}"
+          APP_ENV: patch
 
 manifests:
   rawYaml:
@@ -37,6 +37,10 @@ profiles:
     # automatically activate this profile when current context is "ssh-microk8s"
     activation:
       - kubeContext: ssh-microk8s
+    # patches:
+    #   - op: replace
+    #     path: /build/artifacts/0/docker/buildArgs/APP_ENV
+    #     value: "{{.APP_ENV_DEV}}"
     build:
       artifacts:
         - image: cachac/kubelabs_privateapi_skaffold

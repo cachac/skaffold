@@ -272,12 +272,43 @@ skaffold dev
 ```
 
 # 17. kustomize
+## 17.1. Create Kustomize structure: ./kustomize/private-api
+- base
+- overlays/dev
+- overlays/stage
+
+## 17.2. build
+```
+cd kustomize/private-api
+kustomize build overlays/stage
+
+# optional
+kustomize build overlays/stage > build.yaml
+```
+
+## 17.3. Merge: replicas in dev = 2
+> strategic merge
+```yaml
+patchesStrategicMerge:
+  - deploy-strategic-patch.yaml
+```
+## 17.4. Merge: replicas in stage = 3
+> strategic merge
+
+## 17.5. In-line Patches: stage service on port 4000
+> [Info](https://fabianlee.org/2022/04/15/kubernetes-kustomize-transformations-with-patchesjson6902/)
+```yaml
+patches:
+  # In-line patch
+  - target:
+      kind: Service
+      name: svc-private-api
+    patch: |
+      - op: replace
+        path: /spec/ports/0/port
+        value: 4000
+```
 
 
-
-
-
-
-
-
+# 18. Skaffold deploy + Kustomize
 
