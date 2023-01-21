@@ -110,8 +110,10 @@ export APP_ENV_DEV="{ \"APP_NAME\":\"private-API\", \"NODE_ENV\":\"dev\", \"NODE
 echo $APP_ENV_DEV
 ```
 ```yaml
-        buildArgs:
-          APP_ENV: "{{.APP_ENV_DEV}}"
+    docker:
+		  ...
+			buildArgs:
+				APP_ENV: "{{.APP_ENV_DEV}}"
 ```
 ```vim
 skaffold dev
