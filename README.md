@@ -143,11 +143,8 @@ build:
 ```vim
  cat ~/.skaffold/cache
 ```
-## 12.1. delete
-```vim
-skaffold delete
-```
-## 12.2. cached
+
+## 12.1. cached
 ```vim
 skaffold dev --no-prune=false --cache-artifacts=false
 
@@ -160,6 +157,7 @@ Cleaning up...
  - service "svc-private-api" deleted
 Pruning images...
 
+
 # 13. port-forward
 ```vim
 skaffold dev --port-forward
@@ -167,9 +165,18 @@ skaffold dev --port-forward
 # 14. Run & Logs
 ```vim
 skaffold run
-skaffold run --tail
 
 k get pods -n private
+```
+
+## 14.1. delete
+```vim
+skaffold delete
+```
+
+## 14.2. logs
+```vim
+skaffold run --tail
 ```
 
 # 15. Tagging
@@ -203,6 +210,12 @@ skaffold dev --tag=4.0.1
 Generating tags...
  - cachac/kubelabs_privateapi_skaffold -> cachac/kubelabs_privateapi_skaffold:api-51b89d6
 
+## Check pod container image
+```vim
+git show
+
+k describe pod -n private
+```
 ## 15.4. Custom tags
 ```yaml
   tagPolicy:
@@ -212,7 +225,11 @@ Generating tags...
         - name: PREF
           dateTime:
             format: "2006-01-02"
-            timezone: "Local"APP_ENV_DEV
+            timezone: "Local"
+
+				- name: SUFF
+          gitCommit:
+            variant: AbbrevCommitSha
 ```
 
 # 16. Profile
