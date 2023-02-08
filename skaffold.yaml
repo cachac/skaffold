@@ -1,0 +1,25 @@
+apiVersion: skaffold/v4beta1
+kind: Config
+metadata:
+  name: skaffold
+build:
+  artifacts:
+  - image: cachac/kubelabs_privateapi_skaffold
+    context: assets
+    docker:
+      dockerfile: Dockerfile
+manifests:
+  kustomize:
+    paths:
+    - assets/kustomize/private-api/overlays/dev
+profiles:
+- name: base
+  manifests:
+    kustomize:
+      paths:
+      - assets/kustomize/private-api/base
+- name: stage
+  manifests:
+    kustomize:
+      paths:
+      - assets/kustomize/private-api/overlays/stage

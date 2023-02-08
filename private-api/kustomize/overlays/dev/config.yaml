@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: appenv
+data:
+  APP_ENV: "{ \"APP_NAME\":\"private-API\", \"NODE_ENV\":\"dev\", \"NODE_PORT\":\"3002\", \"TOKEN_LIMIT\":\"7d\", \"TOKEN_SECRET\":\"PASS\" }"
+

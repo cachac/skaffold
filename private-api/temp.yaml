@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    app: private-api
+    env: dev
+    team: devops
+  name: private-dev
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: private-api
+    env: dev
+    team: devops
+  name: svc-private-api
+  namespace: private-dev
+spec:
+  ports:
+  - name: http-privateapi
+    port: 3002
+    targetPort: 3002
+  selector:
+    app: private-api
+    env: dev
+    team: devops
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: private-api
+    env: dev
+    team: devops
+  name: deploy-private-api
+  namespace: private-dev
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: private-api
+      env: dev
+      team: devops
+  template:
+    metadata:
+      labels:
+        app: private-api
+        env: dev
+        team: devops
+      name: private-api
+    spec:
+      containers:
+      - image: cachac/kubelabs_privateapi_skaffold:latest
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: 3082
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+        name: private-api
+        ports:
+        - containerPort: 3002
+          name: private-api
+        - containerPort: 3082
+          name: healthcheck
+        resources:
+          limits:
+            cpu: 200m
+            memory: 200Mi
+          requests:
+            cpu: 10m
+            memory: 100Mi

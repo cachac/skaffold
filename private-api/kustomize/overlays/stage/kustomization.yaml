@@ -1,0 +1,34 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+
+namespace: private-stage
+
+commonLabels:
+  team: devops
+  app: private-api
+  env: stage
+
+resources:
+  - ns.yaml
+  - ../../base
+
+# patchesStrategicMerge:
+#   - deploy-strategic-patch.yaml
+
+patches:
+  - target:
+      kind: Deployment
+      name: deploy-private-api
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 4
+  - target:
+      kind: Service
+      name: svc-private-api
+    patch: |
+      - op: replace
+        path: /spec/ports/0/port
+        value: 4001
+

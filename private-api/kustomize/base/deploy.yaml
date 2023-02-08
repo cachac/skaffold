@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: deploy-private-api
+  # namespace: private
+
+spec:
+  replicas: 1
+
+  # selector:
+  # matchLabels:
+  # app: private-api
+  template:
+    metadata:
+      name: private-api
+      annotations:
+        akeyless/enabled: "true"
+      # labels:
+      #  app: private-api
+
+    spec:
+      containers:
+        - name: private-api
+
+          # envFrom:
+          #   - configMapRef:
+          #       name: appenv
+
+          command:
+            - "node"
+            - "./dist/main.js"
+
+          # command:
+          #   - "sh"
+          #   - "-c"
+          #   - "echo Secret: $APP_ENV && echo Second Secret: $APP_ENV && sleep 10000"
+          env:
+            - name: APP_ENV
+              value: akeyless:/kube/APP_ENV
+
+          image: cachac/kubelabs_privateapi_skaffold:latest
+          ports:
+            - containerPort: 3002
+              name: private-api
+            - containerPort: 3082
+              name: healthcheck
+          resources:
+            limits:
+              cpu: 200m
+              memory: 200Mi
+            requests:
+              cpu: 10m
+              memory: 100Mi
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 3082
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5

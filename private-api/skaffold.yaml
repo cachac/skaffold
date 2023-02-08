@@ -3,10 +3,15 @@ kind: Config
 metadata:
   name: private-api
 build:
-  # local:
-  #   concurrency: 0
+  local:
+    concurrency: 0
 
   tagPolicy:
+    # envTemplate:
+    #   template: "{{.APP_VERSION}}"
+    # gitCommit:
+    #   variant: AbbrevCommitSha
+    #   prefix: "api-"
     customTemplate:
       template: "{{.PREF}}_{{.SUFF}}"
       components:
@@ -14,48 +19,47 @@ build:
           dateTime:
             format: "2006-01-02"
             timezone: "Local"
-
         - name: SUFF
           gitCommit:
             variant: AbbrevCommitSha
 
   artifacts:
-    - image: cachac/kubelabs_privateapi_skaffold
-      docker:
-        dockerfile: Dockerfile
-        buildArgs:
-          APP_ENV: patch
+  - image: cachac/kubelabs_privateapi_skaffold
+    docker:
+      dockerfile: Dockerfile
+      # buildArgs:
+      #   APP_ENV: "nnnnnnn"
 
-manifests:
-  rawYaml:
-    - kube/ns.yaml
-    - kube/deploy.yaml
-    - kube/svc.yaml
+# manifests:
+#   rawYaml:
+#   - kube/ns.yaml
+#   - kube/deploy.yaml
+#   - kube/svc.yaml
 
 profiles:
   - name: dev
-    # automatically activate this profile when current context is "ssh-microk8s"
-    activation:
-      - kubeContext: ssh-microk8s
+    # activation:
+    #   - kubeContext: xyz
+
     # patches:
     #   - op: replace
-    #     path: /build/artifacts/0/docker/buildArgs/APP_ENV
+    #     path:  /build/artifacts/0/docker/buildArgs/APP_ENV
     #     value: "{{.APP_ENV_DEV}}"
-    build:
-      artifacts:
-        - image: cachac/kubelabs_privateapi_skaffold
-          docker:
-            dockerfile: Dockerfile
-            buildArgs:
-              APP_ENV: "{{.APP_ENV_DEV}}"
+
+    manifests:
+      kustomize:
+        paths:
+          - kustomize/overlays/dev
 
   - name: stage
-    activation:
-      - kubeContext: ssh-microk8s-stage
-    build:
-      artifacts:
-        - image: cachac/kubelabs_privateapi_skaffold
-          docker:
-            dockerfile: Dockerfile
-            buildArgs:
-              APP_ENV: "{{.APP_ENV_STAGE}}"
+    # activation:
+    #   - kubeContext: microk8s
+    # patches:
+    #   - op: replace
+    #     path:  /build/artifacts/0/docker/buildArgs/APP_ENV
+    #     value: "{{.APP_ENV_STAGE}}"
+
+    manifests:
+      kustomize:
+        paths:
+          - kustomize/overlays/stage

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  test
+  namespace: default
+  labels:
+    app:  test
+spec:
+  selector:
+    matchLabels:
+      app: hello-secrets
+  replicas: 1
+
+  template:
+    metadata:
+      labels:
+        app:  hello-secrets
+      annotations:
+        akeyless/enabled: "true"
+      #   akeyless/inject_file: "/kube/secret1"
+        # akeyless/inject_file: "/secret1|location=/tmp/s1,/secret2|location=/tmp/s2"
+        # akeyless/inject_file_secret1: "/k8s-secrets/secret1"
+        # akeyless/inject_folder: "/prod/my-secrets-folder/|location=/tmp/secrets/"
+
+    spec:
+      containers:
+      - name:  alpine
+        image:  alpine
+        
+        command:
+          - "sh"
+          - "-c"
+          - "echo Second Secret: $APP_ENV && echo Second Secret: $APP_ENV && export aaa=$(echo $APP_ENV) && sleep 10000"
+        env:
+        - name: APP_ENV
+          value: akeyless:/kube/APP_ENV
